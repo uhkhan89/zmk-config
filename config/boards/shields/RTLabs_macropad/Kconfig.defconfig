@@ -1,0 +1,6 @@
+if SHIELD_RTLABS_MACROPAD
+
+config ZMK_KEYBOARD_NAME
+    default "RTLabs Macropad"
+
+endif

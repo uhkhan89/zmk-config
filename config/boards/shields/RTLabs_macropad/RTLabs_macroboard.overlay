@@ -1,0 +1,145 @@
+#include <dt-bindings/zmk/matrix_transform.h>
+#include <dt-bindings/led/led.h>
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+        zephyr,display = &oled;
+	zmk,underglow = &led_strip;
+	zmk,battery = &vbatt;
+    };
+
+    /* 8 Matrix Keys + 1 Encoder Push Switch */
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-direct";
+        label = "KSCAN";
+        input-gpios
+            = <&gpio1  0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW2: P1.00 */
+            , <&gpio0 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW3: P0.11 */
+            , <&gpio1  4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW4: P1.04 */
+            , <&gpio1  6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW5: P1.06 */
+            , <&gpio0 17 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW6: P0.17 */
+            , <&gpio0 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW7: P0.20 */
+            , <&gpio0 10 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW8: P0.10 */
+            , <&gpio0  9 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW9: P0.09 */
+            , <&gpio0 31 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW10 Push: P0.31 */
+            ;
+    };
+	vbatt: vbatt {
+        compatible = "zmk,battery-nrf-vddh";
+        label = "BATTERY";
+    };
+
+    /* Rotary Encoder (KY-040) */
+    encoder: encoder {
+        compatible = "alps,ec11";
+        label = "ENCODER";
+        a-gpios = <&gpio0  2 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>; /* Pin A: P0.02 */
+        b-gpios = <&gpio0 29 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>; /* Pin B: P0.29 */
+        steps = <80>;
+        status = "okay";
+    };
+
+    sensors: sensors {
+        compatible = "zmk,keymap-sensors";
+        sensors = <&encoder>;
+        status = "okay";
+    };
+
+    vcc_oled: vcc_oled {
+        compatible = "regulator-fixed";
+        regulator-name = "vcc_oled";
+        enable-gpios = <&gpio1 15 GPIO_ACTIVE_LOW>;
+        regulator-always-on;
+        regulator-boot-on;
+    };
+
+    /* 2. RGB Underglow Power (Q3) */
+    ext_power: ext_power {
+        compatible = "zmk,ext-power-generic";
+        label = "EXT_POWER";
+        control-gpios = <&gpio0 24 GPIO_ACTIVE_LOW>;
+        init-delay-ms = <50>;
+    };
+};
+};
+
+/* I2C OLED Configuration */
+&pinctrl {
+    i2c0_default: i2c0_default {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 1, 13)>,
+                    <NRF_PSEL(TWIM_SCL, 1, 11)>;
+        };
+    };
+
+    i2c0_sleep: i2c0_sleep {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 1, 13)>,
+                    <NRF_PSEL(TWIM_SCL, 1, 11)>;
+            low-power-enable;
+        };
+    };
+
+	/* SPI Pin Assignment: MOSI -> P0.22 */
+    spi3_default: spi3_default {
+        group1 {
+            psels = <NRF_PSEL(SPIM_MOSI, 0, 22)>;
+        };
+    };
+
+    spi3_sleep: spi3_sleep {
+        group1 {
+            psels = <NRF_PSEL(SPIM_MOSI, 0, 22)>;
+            low-power-enable;
+        };
+    };
+};
+
+&i2c0 {
+    status = "okay";
+    compatible = "nordic,nrf-twim";
+    pinctrl-0 = <&i2c0_default>;
+    pinctrl-1 = <&i2c0_sleep>;
+    pinctrl-names = "default", "sleep";
+    clock-frequency = <I2C_BITRATE_FAST>;
+
+    oled: ssd1306@3c {
+        compatible = "solomon,ssd1306fb";
+        reg = <0x3c>;
+        label = "DISPLAY";
+        width = <128>;
+        height = <32>;
+        segment-offset = <0>;
+        page-offset = <0>;
+        display-offset = <0>;
+        multiplex-ratio = <31>;
+        segment-remap;
+        com-invdir;
+        com-sequential;
+        prechargep = <0x22>;
+    };
+};
+
+&spi3 {
+    compatible = "nordic,nrf-spim";
+    status = "okay";
+    pinctrl-0 = <&spi3_default>;
+    pinctrl-1 = <&spi3_sleep>;
+    pinctrl-names = "default", "sleep";
+
+    led_strip: ws2812@0 {
+        compatible = "worldsemi,ws2812-spi";
+        label = "WS2812";
+
+        reg = <0>;
+        spi-max-frequency = <4000000>;
+
+        /* 1 logical LED frame since U3 and U4 share the P0.22 line in parallel */
+        chain-length = <1>;
+        spi-one-frame = <0x70>;
+        spi-zero-frame = <0x40>;
+        color-mapping = <LED_COLOR_ID_GREEN
+                         LED_COLOR_ID_RED
+                         LED_COLOR_ID_BLUE>;
+    };
+};
