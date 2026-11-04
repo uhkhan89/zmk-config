@@ -6,7 +6,6 @@
         zmk,kscan = &kscan0;
         zephyr,display = &oled;
         zmk,underglow = &led_strip;
-        zmk,battery = &vbatt;
     };
 
     /* 8 Matrix Keys + 1 Encoder Push Switch */
@@ -14,21 +13,16 @@
         compatible = "zmk,kscan-gpio-direct";
         label = "KSCAN";
         input-gpios
-            = <&gpio1  0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW2: P1.00 */
-            , <&gpio0 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW3: P0.11 */
-            , <&gpio1  4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW4: P1.04 */
-            , <&gpio1  6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW5: P1.06 */
-            , <&gpio0 17 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW6: P0.17 */
-            , <&gpio0 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW7: P0.20 */
-            , <&gpio0 10 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW8: P0.10 */
-            , <&gpio0  9 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW9: P0.09 */
+            = <&gpio1  0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW2:       P1.00 */
+            , <&gpio0 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW3:       P0.11 */
+            , <&gpio1  4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW4:       P1.04 */
+            , <&gpio1  6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW5:       P1.06 */
+            , <&gpio0 17 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW6:       P0.17 */
+            , <&gpio0 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW7:       P0.20 */
+            , <&gpio0 10 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW8:       P0.10 */
+            , <&gpio0  9 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW9:       P0.09 */
             , <&gpio0 31 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW10 Push: P0.31 */
             ;
-    };
-
-    vbatt: vbatt {
-        compatible = "zmk,battery-nrf-vddh";
-        label = "BATTERY";
     };
 
     /* Rotary Encoder (KY-040) */
@@ -47,7 +41,7 @@
         status = "okay";
     };
 
-    /* OLED Power Gate (Q2 on P1.15) */
+    /* Power Gate for OLED (Q2 AO3401A on P1.15) */
     vcc_oled: vcc_oled {
         compatible = "regulator-fixed";
         regulator-name = "vcc_oled";
@@ -56,12 +50,13 @@
         regulator-boot-on;
     };
 
-    /* RGB Underglow Power (Q3 on P0.24) */
-    ext_power: ext_power {
-        compatible = "zmk,ext-power-generic";
-        label = "EXT_POWER";
-        control-gpios = <&gpio0 24 GPIO_ACTIVE_LOW>;
-        init-delay-ms = <50>;
+    /* Power Gate for WS2812 LEDs (Q3 AO3401A on P0.24) */
+    v_raw_rgb: v_raw_rgb {
+        compatible = "regulator-fixed";
+        regulator-name = "v_raw_rgb";
+        enable-gpios = <&gpio0 24 GPIO_ACTIVE_LOW>;
+        regulator-always-on;
+        regulator-boot-on;
     };
 };
 
