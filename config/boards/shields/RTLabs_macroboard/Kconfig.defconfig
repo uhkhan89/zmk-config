@@ -1,6 +1,6 @@
 if SHIELD_RTLABS_MACROBOARD
 
 config ZMK_KEYBOARD_NAME
-    default "RTLabs Macroboard"
+    default "RTLabs Pad"
 
 endif
