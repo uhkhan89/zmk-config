@@ -3,6 +3,7 @@
 #include <dt-bindings/zmk/rgb.h>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/ext_power.h>
+#include <dt-bindings/zmk/outputs.h>
 
 /* Define Layer Indices */
 #define DEFAULT 0
@@ -58,7 +59,7 @@
         /* 
          * Layer 2: RGB Underglow, Power & Bluetooth Controls
          * -------------------------------------------------------------
-         * [SW2: RGB Tog]   [SW3: RGB Eff+]  [SW4: RGB Hue+]  [SW5: Ext Power Tog]
+         * [SW2: RGB Tog]   [SW3: RGB Eff+]  [SW4: RGB Hue+]  [SW5: Ext Power / Output Tog]
          * [SW6: BT Sel 0]  [SW7: BT Sel 1]  [SW8: BT Clear]  [SW9: Trans (Hold)]
          * [SW10 Encoder Push: Enter Bootloader]
          * Encoder Rotation: Brightness Up / Brightness Down
