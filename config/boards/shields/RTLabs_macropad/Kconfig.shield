@@ -1,2 +1,0 @@
-config SHIELD_RTLABS_MACROPAD
-    def_bool $(shields_list_contains,RTLabs_macropad)
