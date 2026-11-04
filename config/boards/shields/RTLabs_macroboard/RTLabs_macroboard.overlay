@@ -1,11 +1,12 @@
 #include <dt-bindings/zmk/matrix_transform.h>
 #include <dt-bindings/led/led.h>
+
 / {
     chosen {
         zmk,kscan = &kscan0;
         zephyr,display = &oled;
-	zmk,underglow = &led_strip;
-	zmk,battery = &vbatt;
+        zmk,underglow = &led_strip;
+        zmk,battery = &vbatt;
     };
 
     /* 8 Matrix Keys + 1 Encoder Push Switch */
@@ -24,7 +25,8 @@
             , <&gpio0 31 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* SW10 Push: P0.31 */
             ;
     };
-	vbatt: vbatt {
+
+    vbatt: vbatt {
         compatible = "zmk,battery-nrf-vddh";
         label = "BATTERY";
     };
@@ -45,6 +47,7 @@
         status = "okay";
     };
 
+    /* OLED Power Gate (Q2 on P1.15) */
     vcc_oled: vcc_oled {
         compatible = "regulator-fixed";
         regulator-name = "vcc_oled";
@@ -53,14 +56,13 @@
         regulator-boot-on;
     };
 
-    /* 2. RGB Underglow Power (Q3) */
+    /* RGB Underglow Power (Q3 on P0.24) */
     ext_power: ext_power {
         compatible = "zmk,ext-power-generic";
         label = "EXT_POWER";
         control-gpios = <&gpio0 24 GPIO_ACTIVE_LOW>;
         init-delay-ms = <50>;
     };
-
 };
 
 /* I2C OLED Configuration */
@@ -80,7 +82,7 @@
         };
     };
 
-	/* SPI Pin Assignment: MOSI -> P0.22 */
+    /* SPI Pin Assignment: MOSI -> P0.22 */
     spi3_default: spi3_default {
         group1 {
             psels = <NRF_PSEL(SPIM_MOSI, 0, 22)>;
@@ -106,7 +108,6 @@
     oled: ssd1306@3c {
         compatible = "solomon,ssd1306fb";
         reg = <0x3c>;
-        label = "DISPLAY";
         width = <128>;
         height = <32>;
         segment-offset = <0>;
@@ -130,11 +131,8 @@
     led_strip: ws2812@0 {
         compatible = "worldsemi,ws2812-spi";
         label = "WS2812";
-
         reg = <0>;
         spi-max-frequency = <4000000>;
-
-        /* 1 logical LED frame since U3 and U4 share the P0.22 line in parallel */
         chain-length = <1>;
         spi-one-frame = <0x70>;
         spi-zero-frame = <0x40>;
